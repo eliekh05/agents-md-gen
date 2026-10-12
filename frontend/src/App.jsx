@@ -1,7 +1,7 @@
 import { useState, useCallback, useRef } from "react";
 import ReactMarkdown from "react-markdown";
 
-const API_BASE = import.meta.env.VITE_API_BASE || "https://agents-md-gen.workers.dev";
+const API_BASE = import.meta.env.VITE_API_BASE || "https://agents-md-gen.eliekh05.workers.dev";
 
 const STEPS = [
   { id: "repo",      label: "Fetching repository metadata" },
