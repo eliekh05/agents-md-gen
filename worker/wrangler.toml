@@ -1,7 +1,7 @@
 name = "agents-md-gen"
 main = "index.js"
 compatibility_date = "2024-01-01"
-compatibility_flags = ["nodejs_compat"]
 
 [vars]
-# Set GITHUB_TOKEN as a secret: wrangler secret put GITHUB_TOKEN
+# Set GITHUB_TOKEN as a Wrangler secret (never commit it):
+# wrangler secret put GITHUB_TOKEN

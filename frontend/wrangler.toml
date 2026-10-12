@@ -1,5 +1,7 @@
 name = "agents-md-gen-frontend"
 pages_build_output_dir = "dist"
 
-[vars]
-VITE_API_BASE = "https://agents-md-gen.eliekh05.workers.dev"
+# NOTE: VITE_API_BASE must be set as a build-time environment variable
+# in the Cloudflare Pages dashboard (Settings → Environment Variables),
+# NOT here in [vars] (those are runtime-only and invisible to Vite's build).
+# Current deployed value: https://agents-md-gen.eliekh05.workers.dev
