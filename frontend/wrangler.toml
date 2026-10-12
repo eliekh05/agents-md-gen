@@ -2,4 +2,4 @@ name = "agents-md-gen-frontend"
 pages_build_output_dir = "dist"
 
 [vars]
-VITE_API_BASE = "https://agents-md-gen.workers.dev"
+VITE_API_BASE = "https://agents-md-gen.eliekh05.workers.dev"
