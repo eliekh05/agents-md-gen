@@ -2,7 +2,7 @@
 
 > Generate a highly detailed `AGENTS.md` for any GitHub repository. Real analysis, no templates.
 
-[![Live](https://img.shields.io/badge/Live-agents--md--gen.pages.dev-7c6af7?style=flat-square)](https://agents-md-gen.pages.dev)
+[![Live](https://img.shields.io/badge/Live-agents--md--gen--frontend.pages.dev-7c6af7?style=flat-square)](https://agents-md-gen-frontend.pages.dev)
 
 ## What it does
 
