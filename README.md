@@ -71,45 +71,6 @@ agents-md-gen/
     └── wrangler.toml
 ```
 
-## Development
-
-### Worker
-
-```bash
-cd worker
-npm install
-npm run dev      # Starts local worker on http://localhost:8787
-```
-
-### Frontend
-
-```bash
-cd frontend
-npm install
-npm run dev      # Starts Vite dev server on http://localhost:5173
-```
-
-Set `VITE_API_BASE=http://localhost:8787` locally to point the frontend at the local worker.
-
-## Deployment
-
-### Worker (Cloudflare Workers)
-
-```bash
-cd worker
-npx wrangler deploy
-# Optional: add a GitHub token for higher API rate limits
-npx wrangler secret put GITHUB_TOKEN
-```
-
-### Frontend (Cloudflare Pages)
-
-```bash
-cd frontend
-npm run build
-npx wrangler pages deploy dist
-```
-
 ## Environment Variables
 
 | Variable | Where | Description |
