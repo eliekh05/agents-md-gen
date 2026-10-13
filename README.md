@@ -6,7 +6,7 @@
 
 ## What it does
 
-Most AI agent context files are written by hand or use generic templates. **agents-md-gen** clones any GitHub repository via the API, deeply analyzes it, and generates an accurate `AGENTS.md` tailored to that specific repo.
+Most AI agent context files are written by hand or use generic templates. **agents-md-gen** clones any GitHub repository via the GitHub API, deeply analyzes it, and generates an accurate `AGENTS.md` tailored to that specific repo.
 
 The output is designed to be useful for:
 - **Claude** (Anthropic) — via `AGENTS.md` / `CLAUDE.md`
@@ -60,8 +60,8 @@ The output is designed to be useful for:
 
 ```
 agents-md-gen/
-├── worker/        Cloudflare Worker — GitHub API proxy + deep analysis + AGENTS.md builder
-│   ├── index.js   Main worker (vanilla JS, no dependencies)
+├── worker/        Cloudflare Worker — GitHub API proxy + analysis engine
+│   ├── index.js   Main worker (vanilla JS, zero dependencies)
 │   └── wrangler.toml
 └── frontend/      React + Vite — Cloudflare Pages
     ├── src/
@@ -71,53 +71,11 @@ agents-md-gen/
     └── wrangler.toml
 ```
 
-## Development
+## Tech stack
 
-### Worker
-
-```bash
-cd worker
-npm install
-npm run dev      # Starts local worker on http://localhost:8787
-```
-
-### Frontend
-
-```bash
-cd frontend
-npm install
-npm run dev      # Starts Vite dev server on http://localhost:5173
-```
-
-Set `VITE_API_BASE=http://localhost:8787` in a `.env.local` file to point the frontend at the local worker.
-
-## Deployment
-
-### Worker (Cloudflare Workers)
-
-```bash
-cd worker
-npx wrangler deploy
-# Optional but recommended: add a GitHub token for higher API rate limits
-npx wrangler secret put GITHUB_TOKEN
-```
-
-### Frontend (Cloudflare Pages)
-
-```bash
-cd frontend
-npm run build
-npx wrangler pages deploy dist
-```
-
-> **Important:** Set `VITE_API_BASE` as a **build-time** environment variable in the Cloudflare Pages dashboard (Settings → Environment Variables), not in `wrangler.toml [vars]` — Vite cannot read runtime vars.
-
-## Environment Variables
-
-| Variable | Where | Description |
-|----------|-------|-------------|
-| `GITHUB_TOKEN` | Worker secret (`wrangler secret put`) | GitHub PAT for higher rate limits (optional but recommended) |
-| `VITE_API_BASE` | Pages build-time env var (dashboard) | URL of the deployed worker |
+- **Worker:** Cloudflare Workers (vanilla JS, zero dependencies)
+- **Frontend:** React 18, Vite, react-markdown
+- **Hosting:** Cloudflare Workers + Pages
 
 ## Comparison with gh-repo-gen
 
@@ -133,11 +91,37 @@ npx wrangler pages deploy dist
 | Branch & PR context | ✗ | ✓ |
 | Existing AI config detection | ✗ | ✓ |
 
-## Tech stack
+## FAQ
 
-- **Worker:** Cloudflare Workers (vanilla JS, zero dependencies)
-- **Frontend:** React 18, Vite, react-markdown
-- **Hosting:** Cloudflare Workers + Pages
+**Q: Does it work with private repositories?**
+Yes. Paste a GitHub personal access token (PAT) into the token field. The token needs `repo` scope for private repos. It is never stored — it's sent directly to the worker for that one request and discarded.
+
+**Q: Will it hit GitHub API rate limits?**
+Without a token, the GitHub API allows 60 requests/hour per IP. Each generation uses roughly 10–15 API calls, so you can generate 4–6 times per hour unauthenticated. With a token the limit rises to 5,000 requests/hour — effectively unlimited for normal use.
+
+**Q: Is my token safe?**
+The token travels over HTTPS to the Cloudflare Worker, is used only to make GitHub API calls for that request, and is never logged, stored, or persisted anywhere. The worker is open source — you can audit exactly what it does with it.
+
+**Q: Does it read my actual source code?**
+No. The worker reads the file tree structure and a small set of well-known manifest files (`package.json`, `requirements.txt`, `go.mod`, `Cargo.toml`, `.env.example`, etc.). It does not download or read arbitrary source files, so large repos are fast and your code stays private.
+
+**Q: How accurate is the framework detection?**
+It detects 80+ frameworks and tools by scanning dependency files and config file names. It will correctly identify anything declared in your manifests. It won't detect something that's only referenced in source code with no manifest entry.
+
+**Q: Can I use this for a monorepo?**
+Yes. The tool detects monorepo signals (`pnpm-workspace.yaml`, `turbo.json`, `nx.json`, `lerna.json`, `packages/`, `apps/`) and adds a monorepo section to the output with relevant guidance for AI agents.
+
+**Q: What languages and ecosystems are supported?**
+JavaScript/TypeScript (npm, pnpm, yarn, bun), Python (pip, pipenv, poetry), Go, Rust, Ruby, PHP, Java/Kotlin (Maven, Gradle), and any repo with a recognizable file tree. The output quality is highest for JS/TS and Python repos since those have the richest manifest formats.
+
+**Q: The generated AGENTS.md isn't perfect for my repo. What should I do?**
+Treat it as a strong first draft. Download it, drop it into your repo root, and edit the sections that need tweaking. The hard part — extracting the real structure, stack, scripts, and env vars — is already done accurately. You're just refining the prose.
+
+**Q: Does it work with GitLab or Bitbucket repos?**
+Not currently. The tool is built on the GitHub REST API. GitLab and Bitbucket support may be added in a future version.
+
+**Q: How is this different from just asking ChatGPT or Claude to write an AGENTS.md?**
+An AI writing from a description guesses. This tool reads the actual repository — the real file tree, the real dependencies, the real scripts, the real CI config. The output reflects what's actually in the code, not what you remember to mention.
 
 ## License
 
